@@ -48,18 +48,18 @@
               <label for="amountInput">Investment amount</label>
             </div>
             <div class="amount-box">
-              <span>₹</span>
-              <input id="amountInput" inputmode="numeric" autocomplete="off" value="50,000" aria-describedby="amountHelp" />
+              <span>$</span>
+              <input id="amountInput" inputmode="numeric" autocomplete="off" value="2,000" aria-describedby="amountHelp" />
             </div>
-            <input type="range" id="amountRange" min="5000" max="500000" step="5000" value="50000" aria-label="Investment amount slider" />
+            <input type="range" id="amountRange" min="100" max="5000" step="100" value="2000" aria-label="Investment amount slider" />
             <div class="chips" role="group" aria-label="Quick amounts">
-              <button class="chip" data-amt="10000">₹10K</button>
-              <button class="chip" data-amt="25000">₹25K</button>
-              <button class="chip" data-amt="50000">₹50K</button>
-              <button class="chip" data-amt="100000">₹1L</button>
-              <button class="chip" data-amt="300000">₹3L</button>
+              <button class="chip" data-amt="500">$500</button>
+              <button class="chip" data-amt="1000">$1K</button>
+              <button class="chip" data-amt="2000">$2K</button>
+              <button class="chip" data-amt="3500">$3.5K</button>
+              <button class="chip" data-amt="5000">$5K</button>
             </div>
-            <small id="amountHelp" class="hint">₹5,000 – ₹5,00,000. Split across 5 borrowers, max 35% each.</small>
+            <small id="amountHelp" class="hint">$100 – $5,000. Split across your top 5 in proportion to match score.</small>
           </div>
 
           <div class="field">
@@ -74,17 +74,9 @@
               <button class="chip" data-risk="5">Balanced</button>
               <button class="chip" data-risk="9">Aggressive</button>
             </div>
-            <small id="riskHelp" class="hint">You tolerate up to <b id="tolOut">13%</b> chance of default per borrower.</small>
+            <small id="riskHelp" class="hint">Your ideal borrower has about <b id="tolOut">10%</b> default probability.</small>
           </div>
 
-          <div class="field">
-            <label for="tenureSel">Loan tenure</label>
-            <select id="tenureSel">
-              <option value="99">Any tenure</option>
-              <option value="12">Up to 12 months</option>
-              <option value="24">Up to 24 months</option>
-            </select>
-          </div>
 
           <div class="field kyc-field">
             <label class="switch">
@@ -96,6 +88,8 @@
               </span>
             </label>
             <p class="kyc-note" id="kycNote"></p>
+          </div>
+          <div class="engine" id="engineStatus" role="status"><span class="engine-dot"></span><span>Connecting to matchmaker…</span>
           </div>
         </aside>
 
@@ -115,7 +109,7 @@
             <div class="card-head">
               <div>
                 <h2 class="panel-title">Risk vs. return map</h2>
-                <p class="hint">Each dot is a listing. Shaded area is within your risk tolerance. Numbered dots are your top 5.</p>
+                <p class="hint">Each dot is a listing. The shaded band is your risk sweet spot (risk fit ≥ 20 of 40 points). Numbered dots are your top 5.</p>
               </div>
               <div class="legend">
                 <span><i class="dot dot-top"></i>Top 5</span>
@@ -124,7 +118,7 @@
               </div>
             </div>
             <div class="chart-wrap" id="chartWrap">
-              <svg id="chart" role="img" aria-label="Scatter chart of default risk versus expected ROI"></svg>
+              <svg id="chart" role="img" aria-label="Scatter chart of default probability versus net ROI"></svg>
               <div class="tooltip" id="tooltip" role="status"></div>
             </div>
           </div>
@@ -142,7 +136,7 @@
           </div>
           <div class="search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input id="search" type="search" placeholder="Search name, city, purpose" aria-label="Search listings" />
+            <input id="search" type="search" placeholder="Search name, ID, purpose" aria-label="Search listings" />
           </div>
         </div>
         <div class="card table-card">
@@ -150,9 +144,9 @@
             <table class="table" id="table">
               <thead>
                 <tr>
-                  <th>Rank</th><th>Borrower</th><th>KYC</th><th>Grade</th>
-                  <th class="num">Rate</th><th class="num">Default risk</th><th class="num">Est. ROI p.a.</th>
-                  <th class="num">Still needed</th><th>Fit score</th>
+                  <th>Rank</th><th>ID</th><th>Borrower</th><th>KYC</th><th class="num">Credit score</th><th>Tier</th>
+                  <th class="num">Interest</th><th class="num">Default prob.</th><th class="num">Net ROI</th>
+                  <th class="num">Requested</th><th>Match score</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -180,8 +174,12 @@
           <fieldset class="step is-active" data-step="1">
             <legend class="panel-title">Verify Aadhaar</legend>
             <div class="field">
-              <label for="fName">Full name (as on Aadhaar)</label>
+              <label for="fName">Owner name (as on Aadhaar)</label>
               <input id="fName" required autocomplete="name" placeholder="e.g. Sunita Pawar" />
+            </div>
+            <div class="field">
+              <label for="fBiz">Business name</label>
+              <input id="fBiz" placeholder="e.g. Pawar Tiffin Service" />
             </div>
             <div class="field">
               <label for="fAadhaar">Aadhaar number</label>
@@ -223,15 +221,10 @@
             <legend class="panel-title">Loan details</legend>
             <div class="verified-banner" id="kycStatusBanner"></div>
             <div class="grid-2">
-              <div class="field"><label for="fAmount">Amount needed (₹)</label><input id="fAmount" inputmode="numeric" value="60000" /></div>
-              <div class="field"><label for="fTenure">Tenure</label>
-                <select id="fTenure"><option>6</option><option>9</option><option selected>12</option><option>18</option><option>24</option><option>36</option></select></div>
-              <div class="field"><label for="fPurpose">Purpose</label><input id="fPurpose" value="Kirana store inventory" /></div>
-              <div class="field"><label for="fCity">City</label><input id="fCity" value="Pune" /></div>
-              <div class="field"><label for="fScore">Credit score (CIBIL)</label><input id="fScore" inputmode="numeric" value="742" /></div>
-              <div class="field"><label for="fIncome">Monthly income (₹)</label><input id="fIncome" inputmode="numeric" value="38000" /></div>
-              <div class="field"><label for="fEmi">Existing EMIs per month (₹)</label><input id="fEmi" inputmode="numeric" value="6000" /></div>
-              <div class="field"><label for="fVintage">Years in work / business</label><input id="fVintage" inputmode="decimal" value="4" /></div>
+              <div class="field"><label for="fAmount">Amount requested ($)</label><input id="fAmount" inputmode="numeric" value="1500" /></div>
+              <div class="field"><label for="fRate">Interest rate offered (% p.a.)</label><input id="fRate" inputmode="decimal" value="13" /></div>
+              <div class="field"><label for="fPurpose">Purpose</label><input id="fPurpose" value="Delivery van repair" /></div>
+              <div class="field"><label for="fScore">Credit score (300–850)</label><input id="fScore" inputmode="numeric" value="705" /></div>
             </div>
             <div class="preview card-inset" id="loanPreview" aria-live="polite"></div>
             <div class="form-actions">
@@ -239,7 +232,7 @@
             </div>
           </fieldset>
         </form>
-        <p class="hint disclaimer">Demo: verification is simulated in your browser — no data leaves this page. In production this step would call UIDAI Aadhaar e-KYC (or DigiLocker) and the Protean/NSDL PAN verification API.</p>
+        <p class="hint disclaimer">Demo: Aadhaar and PAN checks are simulated in your browser. Only the masked IDs (last 4 digits) and loan details are sent to the matchmaker backend. In production this step would call UIDAI Aadhaar e-KYC (or DigiLocker) and the Protean/NSDL PAN verification API.</p>
       </div>
     </section>
 
@@ -247,30 +240,30 @@
     <section class="view" id="view-how" aria-labelledby="howTitle">
       <div class="wrap narrow prose">
         <h1 id="howTitle" class="page-title">How the matchmaker ranks borrowers</h1>
-        <p>Every open listing gets a <b>fit score</b> from 0 to 100 for <b>you specifically</b>. It combines four factors, and the weights move with your risk appetite.</p>
+        <p>Every open listing gets a <b>match score</b> from 0 to 100 points for <b>you specifically</b>. Scores are computed by the Java matchmaker backend each time you move a control.</p>
 
         <div class="how-grid">
-          <div class="card how-card"><h3>1. Default risk</h3><p>A logistic scorecard estimates the probability of default (PD) from credit score, debt-to-income ratio, on-time repayment history, work/business vintage, tenure and KYC status.</p></div>
-          <div class="card how-card"><h3>2. Expected ROI</h3><p class="formula">ROI p.a. = interest rate − 1% fee − (PD × 50% loss ÷ avg. loan life)</p><p>Higher-rate loans only rank well if their extra interest more than covers their expected losses.</p></div>
-          <div class="card how-card"><h3>3. Capacity</h3><p>Your amount is split across 5 borrowers. Listings that can absorb your full share score higher; nearly-funded loans score lower as your amount grows.</p></div>
-          <div class="card how-card"><h3>4. Trust</h3><p>Aadhaar + PAN verification and repayment track record. Unverified borrowers also carry a default-risk premium.</p></div>
+          <div class="card how-card"><h3>Net expected ROI</h3><p class="formula">Net ROI = interest rate − default probability × 75% × 100</p><p>The return you can expect after the average loss from defaults, assuming 75% of a defaulted loan is lost.</p></div>
+          <div class="card how-card"><h3>Risk fit · up to 40 pts</h3><p class="formula">risk index = default prob × 50<br/>risk fit = 40 − 5 × |appetite − risk index|</p><p>Borrowers whose risk matches your appetite score highest. At appetite 1 the ideal is about 2% default risk; at 5 it is 10%.</p></div>
+          <div class="card how-card"><h3>Return · up to 35 pts</h3><p class="formula">return = 2 × net ROI × (0.6 + 0.4 × appetite ÷ 10)</p><p>Higher net ROI scores more, and counts for more as your appetite rises.</p></div>
+          <div class="card how-card"><h3>Capital fit · up to 25 pts</h3><p class="formula">capital fit = 25 × (1 − |requested − capital| ÷ max(requested, capital))</p><p>Requests close in size to your available capital score highest.</p></div>
         </div>
 
-        <h2 class="panel-title">The weights</h2>
-        <div class="card weights" id="weightsViz"></div>
-        <p>On top of this, any borrower whose default risk exceeds your tolerance (3% at appetite 1, up to 23% at appetite 10) gets a penalty that grows with the gap. That is why a conservative investor never sees E-grade loans at the top, while an aggressive investor gets higher-yield loans that are still priced well.</p>
+        <h2 class="panel-title">Risk tiers</h2>
+        <div class="grades">
+          <span class="tier t-low">Low Risk</span> default ≤ 4%
+          <span class="tier t-mod">Moderate Risk</span> 4–9%
+          <span class="tier t-high">High Risk</span> above 9%
+        </div>
+
+        <h2 class="panel-title">Rationale</h2>
+        <p>Each recommendation carries a one-line rationale from the backend: conservative investors (1–3) see solvency-based reasons, aggressive investors (8–10) see yield-based reasons, and balanced investors see a blend.</p>
 
         <h2 class="panel-title">Allocation</h2>
-        <p>Your amount is split across the top 5 in proportion to fit score, capped at 35% per borrower and at what each borrower still needs. Anything that can't be placed is shown as unallocated.</p>
+        <p>Your capital is split across the top 5 in proportion to match score, never more than what a borrower requested.</p>
 
-        <h2 class="panel-title">Grades</h2>
-        <div class="grades">
-          <span class="grade g-A">A</span> PD &lt; 3%
-          <span class="grade g-B">B</span> 3–6%
-          <span class="grade g-C">C</span> 6–10%
-          <span class="grade g-D">D</span> 10–16%
-          <span class="grade g-E">E</span> 16%+
-        </div>
+        <h2 class="panel-title">Verified borrowers only</h2>
+        <p>When the filter is on, the backend leaves out any borrower who has not verified both Aadhaar and PAN before ranking.</p>
       </div>
     </section>
   </main>
