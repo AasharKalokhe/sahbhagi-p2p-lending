@@ -5,9 +5,9 @@ Investors set a risk appetite (1–10) and available capital ($100–$5,000). A 
 ## Project layout
 ```
 backend/src/MatchmakerServer.java   Java matchmaker algorithm + JSON HTTP API (JDK only)
-public/                             Static web app (HTML/CSS/JS)
-  engine.js                         API client + offline mirror of the Java algorithm
-  data.js                           Mirror of the sample listings (offline fallback)
+index.html, styles.css, app.js      Static web app
+engine.js                           API client + offline mirror of the Java algorithm
+data.js                             Mirror of the sample listings (offline fallback)
 ```
 
 ## Matching algorithm (backend)
@@ -35,7 +35,7 @@ Each borrower has Aadhaar and PAN verification status. With `verifiedOnly=true` 
 ## Run locally
 ```bash
 cd backend && javac -d out src/MatchmakerServer.java && java -cp out MatchmakerServer   # API on :5000
-cd public && python3 -m http.server 8080                                              # web app on :8080
+python3 -m http.server 8080                                                          # web app on :8080 (repo root)
 ```
 If the API is unreachable, the web app falls back to an identical JavaScript copy of the algorithm.
 
