@@ -435,7 +435,7 @@
     if ($("#fOtp").value.trim() !== kyc.otp) { $("#otpErr").textContent = "Incorrect OTP. Check the demo message and try again."; return; }
     kyc.aadhaar = true; kyc.aadhaarLast4 = fA.value.replace(/\D/g, "").slice(-4);
     $("#aadhaarMaskOut").textContent = "XXXX XXXX " + kyc.aadhaarLast4;
-    toast("Aadhaar verified"); setStep(2); fP.focus();
+    toast("Aadhaar verified (simulated)"); setStep(2); fP.focus();
   });
   fP.addEventListener("input", () => { fP.value = fP.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); $("#panErr").textContent = ""; fP.classList.remove("invalid", "valid"); if (fP.value.length === 10) fP.classList.add(/^[A-Z]{3}P[A-Z]\d{4}[A-Z]$/.test(fP.value) ? "valid" : "invalid"); });
   $("#samplePan").addEventListener("click", () => {
@@ -451,7 +451,7 @@
     const sur = (fN.value.trim().split(/\s+/).pop() || "")[0]?.toUpperCase();
     if (sur && v[4] !== sur) { $("#panErr").textContent = `The 5th character should match your surname's initial (${sur}). Name mismatch.`; fP.classList.add("invalid"); return; }
     kyc.pan = true; kyc.panMasked = v.slice(0, 1) + "XXXX" + v.slice(5, 9) + "X";
-    toast("PAN verified"); setStep(3);
+    toast("PAN verified (simulated)"); setStep(3);
   });
   $("#skipPan").addEventListener("click", () => { kyc.pan = false; setStep(3); });
 
