@@ -10,7 +10,9 @@
 
   let listings = window.BORROWERS.map(E.enrich);
   const state = { amount: 50000, risk: 5, tenureMax: 99, verifiedOnly: true, query: "" };
-  let prevRanks = null; // id -> rank in top 5 from previous render
+  let prevRanks = null;   // baseline ranks (before current interaction) for ▲▼ badges
+  let lastRender = null;  // ranks from the previous frame, used for the flash effect
+  let baselineTimer = 0;
   let current = { ranked: [], top: [], alloc: [], P: null };
 
   /* ---------- Theme ---------- */
@@ -79,7 +81,11 @@
     const { alloc, unallocated } = E.allocate(top, state.amount);
     current = { ranked, top, alloc, unallocated, P };
     renderKpis(); renderTop(); renderChart(); renderTable(); renderKycNote();
-    prevRanks = new Map(top.map((t) => [t.id, t.rank]));
+    const snap = new Map(top.map((t) => [t.id, t.rank]));
+    lastRender = snap;
+    if (!prevRanks) prevRanks = snap;
+    clearTimeout(baselineTimer);
+    baselineTimer = setTimeout(() => { prevRanks = snap; }, 1500);
   }
 
   function renderKycNote() {
@@ -157,7 +163,7 @@
         else if (was > t.rank) mv = `<span class="move up">▲${was - t.rank}</span>`;
         else if (was < t.rank) mv = `<span class="move down">▼${t.rank - was}</span>`;
       }
-      const changed = prevRanks && prevRanks.get(t.id) !== t.rank;
+      const changed = lastRender && lastRender.get(t.id) !== t.rank;
       return `<article class="card rec${changed ? " flash" : ""}" data-id="${t.id}" tabindex="0" aria-label="Rank ${t.rank}: ${esc(t.name)}">
         ${mv}
         <div class="rank-badge">${t.rank}</div>
@@ -268,7 +274,7 @@
         <td><div class="who"><div class="avatar">${l.initials}</div><div><div class="who-name">${esc(l.name)}</div><div class="who-sub">${esc(l.purpose)} · ${esc(l.city)}</div></div></div></td>
         <td><div class="badges">${kycBadges(l)}</div></td>
         <td><span class="grade g-${l.grade}">${l.grade}</span></td>
-        <td class="num">${l.rate}%</td>
+        <td class="num">${l.rate.toFixed(1)}%</td>
         <td class="num ${l.pd > current.P.pdMax ? "warn" : ""}">${pct(l.pd)}</td>
         <td class="num ${l.expAnnual >= 0 ? "pos" : "neg"}"><b>${pct(l.expAnnual)}</b></td>
         <td class="num">${rs(l.remaining)}</td>
@@ -300,7 +306,7 @@
       </div>
       <div class="stats">
         <div class="stat"><b class="${l.expAnnual >= 0 ? "pos" : "neg"}">${pct(l.expAnnual)}</b><span>Est. ROI p.a.</span></div>
-        <div class="stat"><b>${l.rate}%</b><span>Interest rate</span></div>
+        <div class="stat"><b>${l.rate.toFixed(1)}%</b><span>Interest rate</span></div>
         <div class="stat"><b class="${l.pd > current.P.pdMax ? "warn" : ""}">${pct(l.pd)}</b><span>Default risk</span></div>
         <div class="stat"><b>${rs(l.amount)}</b><span>Loan size</span></div>
         <div class="stat"><b>${l.tenure} mo</b><span>Tenure</span></div>
@@ -365,7 +371,7 @@
     $("#mCancel").onclick = closeModal;
     $("#mOk").onclick = () => {
       current.top.forEach((t, i) => { const l = listings.find((x) => x.id === t.id); l.funded += current.alloc[i]; l.remaining = Math.max(0, l.amount - l.funded); });
-      closeModal(); toast(`Invested ${rs(s.inv)}. Listings updated with your funding.`); prevRanks = null; update();
+      closeModal(); toast(`Invested ${rs(s.inv)}. Listings updated with your funding.`); prevRanks = null; lastRender = null; update();
     };
   });
 

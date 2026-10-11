@@ -94,7 +94,14 @@
       if (used < 1) break;
     }
     const rounded = alloc.map((x) => Math.floor(x / 100) * 100);
-    const unallocated = Math.max(0, amount - rounded.reduce((s, x) => s + x, 0));
+    // hand the rounding remainder to the best-fit borrower(s) that still have room
+    let rem = amount - rounded.reduce((s, x) => s + x, 0);
+    for (let i = 0; i < top.length && rem > 0; i++) {
+      const room = Math.min(cap + 100, top[i].remaining) - rounded[i];
+      const give = Math.max(0, Math.min(rem, room));
+      rounded[i] += give; rem -= give;
+    }
+    const unallocated = Math.max(0, rem);
     return { alloc: rounded, unallocated };
   }
 
